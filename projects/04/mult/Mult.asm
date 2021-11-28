@@ -10,3 +10,39 @@
 // R0 >= 0, R1 >= 0, and R0*R1 < 32768.
 
 // Put your code here.
+
+// loop count
+@i
+M=0
+
+// init R2
+@R2
+M=0
+
+// LOOP
+(LOOP)
+  // if i >= R1 goto END
+  @i
+  D=M
+  @R1
+  D=D-M
+  @END
+  D;JGE
+
+  // add R0 to R2
+  @R0
+  D=M
+  @R2
+  M=D+M
+
+  // i++
+  @i
+  M=M+1
+
+  // back to LOOP
+  @LOOP
+  0;JMP
+
+(END)
+  @END
+  0;JMP
