@@ -40,4 +40,57 @@ CHIP CPU {
 
     PARTS:
     // Put your code here:
+
+    // A input
+    Mux16(a[0..14]=instruction[0..14], b=outALU, sel=instruction[15], out=inA);
+
+    // A load
+    Not(in=instruction[15], out=notFirst);
+    Or(a=instruction[5], b=notFirst, out=loadA);
+
+    // D load
+    And(a=instruction[15], b=instruction[4], out=loadD);
+
+    // seond input for ALU
+    Mux16(a=outA, b=inM, sel=instruction[12], out=outSecond);
+
+    ALU(x=outD, y=outSecond, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=outM, zr=zr, ng=ng, out=outALU);
+
+    // A register
+    ARegister(in=inA, load=loadA, out=outA, out[0..14]=addressM);
+
+    // D register
+    DRegister(in=outALU, load=loadD, out=outD);
+
+    // writeM
+    And(a=instruction[15], b=instruction[3], out=writeM);
+
+    // compute inc
+    // Or(a=instruction[0], b=instruction[1], out=temp);
+    // Or(a=temp, b=instruction[2], out=temp2);
+    // Not(in=temp2, out=inc);
+
+    // compute PC load
+    Or(a=zr, b=ng, out=zrOrNg);
+    Not(in=zrOrNg, out=rgt0);
+
+    // jump when r > 0
+    And(a=instruction[0], b=rgt0, out=j0);
+
+    // jump when r = 0
+    And(a=instruction[1], b=zr, out=j1);
+
+    // jump when r < 0
+    And(a=instruction[2], b=ng, out=j2);
+
+    // should jump?
+    Or(a=j0, b=j1, out=jumpTemp);
+    Or(a=jumpTemp, b=j2, out=finalJump);
+
+    And(a=instruction[15], b=finalJump, out=load);
+
+    // compute inc  
+    Not(in=load, out=inc);
+
+    PC(in=outA, load=load, inc=inc, reset=reset, out[0..14]=pc);
 }
